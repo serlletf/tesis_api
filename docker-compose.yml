@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: scraping_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+
+  web:
+    build: .
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_DATABASE: scraping_db
+      DB_USER: user
+      DB_PASSWORD: password
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/app
+
+volumes:
+  db_data:
